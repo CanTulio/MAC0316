@@ -2,13 +2,19 @@ D [0-9]
 E [Ee][+-]?{D}+
 %{
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
 #include "mcalc.tab.h"
-
+// printf("yytext = %s\n", yytext)
 %}
 
 %%
+[a-zA-Z]+    { 
+    yylval.fun = malloc(strlen(yytext)+10);
+    strcpy(yylval.fun, yytext);
+    return FUN; }
+
 {D}*[.]?{D}+{E}?	{ yylval.val = yytext; return NUM; }
-[a-zA-Z]+    { yylval.fun = yytext; return FUN; }
 [ \t\n]+	/* pula espacos em branco */
 
 #.*		/* comentarios simples */

@@ -9,9 +9,9 @@ char *oper(char op, char *l, char *r) {
 	sprintf(res, "(%c %s %s)", op, l, r);
 	return res;
 }
-char *functionPrint(char *appS, char *name, char *param) {
-	char *res = malloc(strlen(appS) + strlen(name) + strlen(param) + 6);
-	sprintf(res, "(%s %s %s)", appS, name, param);
+char *functionPrint(char *call, char *name, char *param) {
+	char *res = malloc(strlen(call) + strlen(name) + strlen(param) + 6);
+	sprintf(res, "(%s %s %s)", call, name, param);
 	return res;
 }
 char *dup(char *orig) {
@@ -47,12 +47,12 @@ input:
 ;
 
 exp: 			NUM 		{ $$ = dup($1); }
+		|		FUN OPEN exp CLOSE { $$ = functionPrint("call", $1, $3);} 
 		| 		exp ADD exp	{ $$ = oper('+', $1, $3);}
 		| 		exp SUB exp	{ $$ = oper('-', $1, $3);}
 		| 		exp MUL exp	{ $$ = oper('*', $1, $3);}
 		|		exp DIV exp { $$ = oper('/', $1, $3);}
 		|		exp MOD exp { $$ = oper('%', $1, $3);}
-		|		FUN OPEN exp CLOSE { $$ = functionPrint("appS", $1, $3);} 
 		| 		SUB exp %prec NEG  { $$ = oper('~', $2, "");} 
 		| 		OPEN exp CLOSE	{ $$ = dup($2);}
 		
