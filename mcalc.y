@@ -52,8 +52,8 @@ input:
 ;
 
 exp: 			NUM 		{ $$ = dup($1); }
-		|		FUN OPEN exp CLOSE { $$ = functionPrint("call", $1, $3);}
 		|		IF OPEN exp CLOSE QTN exp COL exp { $$ = ifPrint($3, $6, $8);}
+		|		FUN OPEN exp CLOSE { $$ = functionPrint("call", $1, $3);}
 		| 		exp ADD exp	{ $$ = oper('+', $1, $3);}
 		| 		exp SUB exp	{ $$ = oper('-', $1, $3);}
 		| 		exp MUL exp	{ $$ = oper('*', $1, $3);}

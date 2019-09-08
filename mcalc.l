@@ -9,7 +9,7 @@ E [Ee][+-]?{D}+
 %}
 
 %%
-[if] { return IF; }
+if { return IF; }
 
 [a-zA-Z]+    { 
     yylval.fun = malloc(strlen(yytext)+10);
