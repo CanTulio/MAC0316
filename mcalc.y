@@ -14,6 +14,11 @@ char *functionPrint(char *call, char *name, char *param) {
 	sprintf(res, "(%s %s %s)", call, name, param);
 	return res;
 }
+char *ifPrint(char *cond, char *t, char *f) {
+	char *res = malloc(strlen(cond) + strlen(t) + strlen(f) + 8);
+	sprintf(res, "(if %s %s %s)", cond, t, f);
+	return res;
+}
 char *dup(char *orig) {
 	char *res = malloc(strlen(orig)+1);
 	strcpy(res,orig);
@@ -29,8 +34,8 @@ void yyerror(char *);
 }
 
 %token	<val> NUM
-%token  ADD SUB MUL DIV MOD FUN PRINT OPEN CLOSE
-%type	<val> exp 
+%token  ADD SUB MUL DIV MOD FUN IF COL QTN PRINT OPEN CLOSE
+%type	<val> exp
 %type	<fun> FUN 
 
 
@@ -47,7 +52,8 @@ input:
 ;
 
 exp: 			NUM 		{ $$ = dup($1); }
-		|		FUN OPEN exp CLOSE { $$ = functionPrint("call", $1, $3);} 
+		|		FUN OPEN exp CLOSE { $$ = functionPrint("call", $1, $3);}
+		|		IF OPEN exp CLOSE QTN exp COL exp { $$ = ifPrint($3, $6, $8);}
 		| 		exp ADD exp	{ $$ = oper('+', $1, $3);}
 		| 		exp SUB exp	{ $$ = oper('-', $1, $3);}
 		| 		exp MUL exp	{ $$ = oper('*', $1, $3);}
