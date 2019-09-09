@@ -1,18 +1,18 @@
-tudo: mcalc lang
+tudo: lexigram lang
 
-mcalc: mcalc.tab.o lex.yy.o main.o 
+lexigram: lexigram.tab.o lex.yy.o main.o 
 	gcc -o $@ $^  -lfl
 
-mcalc.tab.o: mcalc.y
-	bison -d mcalc.y
-	gcc -c mcalc.tab.c
+lexigram.tab.o: lexigram.y
+	bison -d lexigram.y
+	gcc -c lexigram.tab.c
 
-lex.yy.o: mcalc.l
-	flex mcalc.l
+lex.yy.o: lexigram.l
+	flex lexigram.l
 	gcc -c lex.yy.c
 
 lang: lang.rkt
 	raco exe $<
 
 clean:
-	rm -f *.o lex.yy.c mcalc.tab.c mcalc.tab.h lang *~
+	rm -f *.o lex.yy.c lexigram.tab.c lexigram.tab.h lang *~

@@ -4,7 +4,7 @@ E [Ee][+-]?{D}+
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "mcalc.tab.h"
+#include "lexigram.tab.h"
 %}
 
 %%
