@@ -1,4 +1,4 @@
-tudo: mcalc direto
+tudo: mcalc lang
 
 mcalc: mcalc.tab.o lex.yy.o main.o 
 	gcc -o $@ $^  -lfl
@@ -11,8 +11,8 @@ lex.yy.o: mcalc.l
 	flex mcalc.l
 	gcc -c lex.yy.c
 
-direto: direto.rkt
+lang: lang.rkt
 	raco exe $<
 
 clean:
-	rm -f *.o lex.yy.c mcalc.tab.c mcalc.tab.h direto *~
+	rm -f *.o lex.yy.c mcalc.tab.c mcalc.tab.h lang *~
