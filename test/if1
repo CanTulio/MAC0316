@@ -1,0 +1,1 @@
+if ( ehPar(4) ) ? (metade(2)) : (dobro(4))
