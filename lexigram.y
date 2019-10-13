@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *oper(char op, char *l, char *r) {
+char *oper(char* op, char *l, char *r) {
 	/* Função que recebe dois operandos l r e uma operação e retorna uma 
 	string na forma (op l r) */
-	char *res = malloc(strlen(l)+strlen(r)+6);
-	sprintf(res, "(%c %s %s)", op, l, r);
+	char *res = malloc(strlen(l)+strlen(r)+strlen(op)+5);
+	sprintf(res, "(%s %s %s)", op, l, r);
 	return res;
 }
 
@@ -54,7 +54,7 @@ void yyerror(char *);
 }
 
 %token	<val> NUM
-%token  ADD SUB MUL DIV MOD IF COL QTN PRINT OPEN CLOSE ARROW ID
+%token  ADD SUB MUL DIV MOD IF COL QTN PRINT OPEN CLOSE ARROW ID LET ATR
 %type	<val> exp
 %type	<arg> ID 
 
@@ -74,15 +74,16 @@ input:
 exp: 			NUM 		{ $$ = dup($1); }
 		|		ID			{ $$ = dup($1); }
 		|		IF OPEN exp CLOSE QTN exp COL exp{ $$ = ifPrint($3, $6, $8);}
-		| 		exp ADD exp	{ $$ = oper('+', $1, $3);}
-		| 		exp SUB exp	{ $$ = oper('-', $1, $3);}
-		| 		exp MUL exp	{ $$ = oper('*', $1, $3);}
-		|		exp DIV exp { $$ = oper('/', $1, $3);}
-		|		exp MOD exp { $$ = oper('%', $1, $3);}
+		| 		exp ADD exp	{ $$ = oper("+", $1, $3);}
+		| 		exp SUB exp	{ $$ = oper("-", $1, $3);}
+		| 		exp MUL exp	{ $$ = oper("*", $1, $3);}
+		|		exp DIV exp { $$ = oper("/", $1, $3);}
+		|		exp MOD exp { $$ = oper("%", $1, $3);}
 		|		OPEN OPEN ID CLOSE ARROW OPEN exp CLOSE CLOSE OPEN exp CLOSE { $$ = callPrint($3, $7, $11); }
 		|		OPEN ID CLOSE ARROW OPEN exp CLOSE { $$ = lamPrint($2, $6); }
-		| 		SUB exp %prec NEG  { $$ = oper('~', $2, "");} 
+		| 		SUB exp %prec NEG  { $$ = oper("~", $2, "");} 
 		| 		OPEN exp CLOSE	{ $$ = dup($2);}
+		|		LET ID ATR exp	{ $$ = oper(":=", $2, $4);}
 
 ;
 
