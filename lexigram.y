@@ -54,7 +54,7 @@ void yyerror(char *);
 }
 
 %token	<val> NUM
-%token  ADD SUB MUL DIV MOD IF COL QTN PRINT OPEN CLOSE ARROW ID LET ATR
+%token  ADD SUB MUL DIV MOD IF COL QTN PRINT OPEN CLOSE ARROW ID LET ATR OPC CLC COM
 %type	<val> exp
 %type	<arg> ID 
 
@@ -84,12 +84,9 @@ exp: 			NUM 		{ $$ = dup($1); }
 		| 		SUB exp %prec NEG  { $$ = oper("~", $2, "");} 
 		| 		OPEN exp CLOSE	{ $$ = dup($2);}
 		|		LET ID ATR exp	{ $$ = oper(":=", $2, $4);}
-
+		|		OPC exp COM exp CLC { $$ = oper("seq", $2, $4);}
 ;
-
 %%
-
 void yyerror(char *s) {
-		// |		FUN OPEN exp CLOSE{ $$ = functionPrint($1, $3);}
   fprintf(stderr,"%s\n",s);
 }

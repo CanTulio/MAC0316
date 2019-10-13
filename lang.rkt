@@ -1,4 +1,5 @@
 #lang plai-typed
+
 ; Core da linguagem
 (define-type langC
   [numC (n : number)]
@@ -29,6 +30,7 @@
   [lamS    (arg : symbol) (body : langS)] ; muda de acordo
   [setS    (var : symbol) (arg : langS)]
   [seqS    (b1 : langS) (b2 : langS)]
+  [letS    (id : symbol) (val : langS) (body : langS)]
   )
 
 ; Desaçucarador
@@ -47,6 +49,7 @@
     [ifS     (c s n) (ifC (desugar c) (desugar s) (desugar n))]
     [setS    (s v)   (setC s (desugar v))]
     [seqS    (b1 b2) (seqC (desugar b1) (desugar b2))]
+    [letS    (id val expr) (appC  (lamC id (desugar expr)) (desugar val))]
     ))
 
 ; Precisamos de Storage e Locations
@@ -202,6 +205,7 @@
          [(%) (modS (parse (second sl)) (parse (third sl)))]
          [(:=) (setS (s-exp->symbol (second sl)) (parse (third sl)))]
          [(seq) (seqS (parse (second sl)) (parse (third sl)))]
+         [(def) (letS (s-exp->symbol (second sl)) (parse (third sl)) (parse (fourth sl)))]
          [else (error 'parse "invalid list input")]))]
     [else (error 'parse "invalid input")]))
 
@@ -225,6 +229,7 @@
 
 ; Leitura de input
 
+
 (interp (desugar (parse (read))) mt-env mt-store)
 (test (interpS '(/ 6 2)) (v*s (numV 3) mt-store))
 
@@ -237,3 +242,5 @@
 (interp (desugar (parse '(+ 10 (call (func x (+ x x)) 16)))) mt-env mt-store)
 
 (interp (desugar (parse '(call (func x (seq (:= x (+ x 10)) x)) 32))) mt-env mt-store)
+
+(interpS '(def fat 1729 (seq (:= fat (func n (if n (* n (call fat (- n 1))) 1))) (call fat 10))))

@@ -19,6 +19,9 @@ if { return IF; }
 
 #.*		/* comentarios simples */
 
+[{]     { return OPC;   }
+[}]     { return CLC;   }
+[,]     { return COM;   }
 [(]		{ return OPEN;  }
 [)]		{ return CLOSE; }
 [:]     { return COL;   }
