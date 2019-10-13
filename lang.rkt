@@ -207,32 +207,4 @@
 
 ; Facilitador
 (define (interpS [s : s-expression]) (interp (desugar (parse s)) mt-env mt-store))
-
-; Biblioteca com algumas definições de função
-;;; (define biblioteca (list 
-;;;                     [fdC 'dobro 'x (plusC (idC 'x) (idC 'x))]
-;;;                     [fdC 'quadrado 'y (multC (idC 'y) (idC 'y))]
-;;;                     [fdC 'fatorial 'n (ifC  (idC 'n) 
-;;; 						 (multC (appC 'fatorial (plusC (idC 'n) (numC -1))) 
-;;; 								(idC 'n))
-;;; 						 (numC 1))]
-;;;                     [fdC 'narciso  'narciso (multC (idC 'narciso) (numC 1000))]
-;;;                     [fdC 'metade 'x (divC (idC 'x) (numC 2))]
-;;;                     [fdC 'ehPar 'x (ifC (modC (idC 'x) (numC 2)) (numC 0) (numC 1))]
-                    
-                    
-;;;                     ))
-
-; Leitura de input
-
-(test (interpS '(/ 6 2)) (v*s (numV 3) mt-store))
-
-(test (interpS '(% 5 2)) (v*s (numV 1) mt-store))
-
-(test (v*s-v (interp (plusC (numC 10) (appC (lamC '_ (numC 5)) (numC 10)))
-              mt-env mt-store))
-      (numV 15))
-
-(interp (desugar (parse '(+ 10 (call (func x (+ x x)) 16)))) mt-env mt-store)
-
-(interp (desugar (parse '(call (func x (seq (:= x (+ x 10)) x)) 32))) mt-env mt-store)
+(interpS (read))

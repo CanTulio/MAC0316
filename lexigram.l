@@ -11,9 +11,9 @@ E [Ee][+-]?{D}+
 if { return IF; }
 
 [a-zA-Z]+    { 
-    yylval.fun = malloc(strlen(yytext)+1);
-    strcpy(yylval.fun, yytext);
-    return FUN; }  /* Regex para detectar chamadas de função */
+    yylval.arg = malloc(strlen(yytext)+1);
+    strcpy(yylval.arg, yytext);
+    return ID; }  /* Regex para detectar chamadas de função */
 
 {D}*[.]?{D}+{E}?	{ yylval.val = malloc(strlen(yytext)+1);
                       strcpy(yylval.val, yytext);
@@ -31,7 +31,7 @@ if { return IF; }
 [*]		{ return MUL;   }
 [/]		{ return DIV;   }
 [%]     { return MOD;   }
-
+=>      { return ARROW; }
 .	{  fprintf(stderr, "Entrada ignorada\n-->%s\n", yytext); }
 
 %%
