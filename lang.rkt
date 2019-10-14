@@ -4,41 +4,43 @@
 (define-type langC
   [numC (n : number)]
   [varC  (s : symbol)]
-  [appC (fun : langC) (arg : langC)]
-  [plusC (l : langC) (r : langC)]
-  [multC (l : langC) (r : langC)]
-  [divC (l : langC) (r : langC)]
-  [modC (l : langC) (r : langC)]
+  [appC (fun : langC) (arg : langC)]              ; Aplicação de função
+  [plusC (l : langC) (r : langC)]                 ; Soma
+  [multC (l : langC) (r : langC)]                 ; Multiplicação
+  [divC (l : langC) (r : langC)]                  ; Divisão
+  [modC (l : langC) (r : langC)]                  ; Módulo : representa l módulo r
+
   [ifC   (condição : langC) (sim : langC) (não : langC)]
-  [lamC (arg : symbol) (body : langC)]
-  [setC (var : symbol) (arg : langC)] 
-  [seqC (b1 : langC) (b2 : langC)] 
+
+  [lamC (arg : symbol) (body : langC)]            ; Lambda que recebe um argumento e um corpo
+  [setC (var : symbol) (arg : langC)]             ; Atribui o valor arg à variável var
+  [seqC (b1 : langC) (b2 : langC)]                ; Sequência de duas operações : b1 e b2
   )
 
-; Corpo da linguagem "açucarado"
+; Linguagem com açúcar
 (define-type langS
   [numS    (n : number)]
   [varS    (s : symbol)]
   [appS    (fun : langS) (arg : langS)] 
-  [plusS   (l : langS) (r : langS)]
-  [bminusS (l : langS) (r : langS)]
-  [uminusS (e : langS)]
+  [plusS   (l : langS) (r : langS)]               
+  [bminusS (l : langS) (r : langS)]               ; Subtração binária
+  [uminusS (e : langS)]                           ; Subtração unária
   [multS   (l : langS) (r : langS)]
   [modS (l : langS) (r : langS)]
   [divS (l : langS) (r : langS)]
   [ifS     (c : langS) (s : langS) (n : langS)]
-  [lamS    (arg : symbol) (body : langS)] ; muda de acordo
+  [lamS    (arg : symbol) (body : langS)] 
   [setS    (var : symbol) (arg : langS)]
   [seqS    (b1 : langS) (b2 : langS)]
-  [letS    (id : symbol) (val : langS) (body : langS)]
+  [letS    (id : symbol) (val : langS) (body : langS)] ;Utilizado para a recursão
   )
 
-; Desaçucarador
+; Desaçucarador - Funciona desaçucarando ramos da expressão em questão
 (define (desugar [as : langS]) : langC  
   (type-case langS as
     [numS    (n)   (numC n)]
     [varS     (s) (varC s)]
-    [lamS     (a b)  (lamC a (desugar b))] ; idem
+    [lamS     (a b)  (lamC a (desugar b))] 
     [appS    (fun arg) (appC (desugar fun) (desugar arg))] 
     [plusS   (l r) (plusC (desugar l) (desugar r))] 
     [multS   (l r) (multC (desugar l) (desugar r))]
@@ -52,10 +54,10 @@
     [letS    (id val expr) (appC  (lamC id (desugar expr)) (desugar val))]
     ))
 
-; Precisamos de Storage e Locations
-(define-type-alias Location number)
+(define-type-alias Location number)               ;O Location é um number.
 
-(define-type Value
+(define-type Value                                ;Nossa linguagem lida com funções de forma muito similar a numeros, 
+                                                  ;então vamos englobar closures e numeros em um tipo novo para facilitar.
   [numV  (n : number)]
   [closV (arg : symbol) (body : langC) (env : Env)])
 
@@ -63,40 +65,46 @@
       [bind (name : symbol) (val : Location)])
 
 (define-type-alias Env (listof Binding))
-(define mt-env empty)        ; ente pronunciar "mt" em inglês e compare com "empty"
-(define extend-env cons)     ; sorte, cons faz exatamente o que queremos para estender o env
+(define mt-env empty)                             ; Environment vazio
+(define extend-env cons)                          ; Operação de extender o environment usando cons
 
-(define-type Storage
+(define-type Storage                              ; Entrada em uma lista contendo endereços de memória
       [cell (location : Location) (val : Value)])
-(define-type-alias Store (listof Storage))
-(define mt-store empty)
-(define override-store cons)
+(define-type-alias Store (listof Storage))        ; Tabela contendo os endereços de memória   
+                                                  ; de variáveis (conjunto de Storage)
+
+(define mt-store empty)                           ; Store vazia
+(define override-store cons)                      ; Operação para expandir
 
 ; lookup também muda o tipo de retorno
-(define (lookup [for : symbol] [env : Env]) : Location
+(define (lookup [for : symbol] [env : Env]) : Location      ; Procura uma variavel uma variavel no env e retorna seu Location
        (cond
-            [(empty? env) (error 'lookup (string-append (symbol->string for) " não foi encontrado"))] ; livre (não definida)
+            [(empty? env) (error 'lookup (string-append (symbol->string for) " não foi encontrado"))] 
+                                                            ;Variável não foi definida, retorna erro
             [else (cond
-                  [(symbol=? for (bind-name (first env)))   ; achou!
+                  [(symbol=? for (bind-name (first env)))   ; Encontrou a variável no env
                                  (bind-val (first env))]
-                  [else (lookup for (rest env))])]))        ; vê no resto
+                  [else (lookup for (rest env))])]))        ; Procura no resto do env
 
-(define (fetch [l : Location] [sto : Store]) : Value
+(define (fetch [l : Location] [sto : Store]) : Value        ; Recebe o endereço de uma variavel e procura seu valor
        (cond
             [(empty? sto) (error 'fetch "posição não encontrada")]
             [else (cond
-                  [(= l   (cell-location (first sto)))   ; achou!
+                  [(= l   (cell-location (first sto)))      ; achou!
                                  (cell-val (first sto))]
-                  [else (fetch l (rest sto))])]))        ; vê no resto
+                  [else (fetch l (rest sto))])]))           ; vê no resto
 
-(define new-loc
+(define new-loc          ;
    (let ( [ n (box 0)])
         (lambda () 
            (begin
               (set-box! n (+ 1 (unbox n)))
               (unbox n)))))
 
-(define (num+ [l : Value] [r : Value]) : Value
+                                                            ; Um dos operandos da soma, multiplicação, módulo ou divisão pode não ser um numV. As funções abaixo verificam se a 
+                                                            ; operação é legal. Por exemplo, não podemos somar 2 a uma definição de função
+
+(define (num+ [l : Value] [r : Value]) : Value 
     (cond
         [(and (numV? l) (numV? r))
              (numV (+ (numV-n l) (numV-n r)))]
@@ -136,19 +144,21 @@
     [varC (n)  (v*s (fetch (lookup n env) sto) sto)]  ; busca em cascata, env e em seguida no sto
     [lamC (a b) (v*s (closV a b env) sto)]
     [seqC (b1 b2) (type-case Result (interp b1 env sto)
-                    [v*s (v-b1 s-b1) ; resultado e store retornado por b1
+                    [v*s (v-b1 s-b1)                  ; resultado e store retornado por b1
                           (interp b2 env s-b1)])]
     ; aplicação de função
     [appC (f a)
-      (type-case Result (interp f env sto) ; acha a função
+      (type-case Result (interp f env sto)            ; acha a função
          [v*s (v-f s-f)
-              (type-case Result (interp a env s-f) ; argumento com sto modificado pela função
+              (type-case Result (interp a env s-f)    ; argumento com sto modificado pela função
                  [v*s (v-a s-a)
-                      (let ([onde (new-loc)]) ; aloca posição para o valor do argumento
-                           (interp (closV-body v-f) ; corpo
-                                   (extend-env (bind (closV-arg v-f) onde) ; com novo argumento
+                      (let ([onde (new-loc)])          ; aloca posição para o valor do argumento
+                           (interp (closV-body v-f)    ; corpo
+                                   (extend-env (bind (closV-arg v-f) onde) 
+                                                       ; com novo argumento
                                        (closV-env v-f))
-                                   (override-store (cell onde v-a) s-a))) ; com novo valor
+                                   (override-store (cell onde v-a) s-a))) 
+                                                       ; com novo valor
                   ])])]
     [plusC (l r) 
            (type-case Result (interp l env sto)
@@ -180,9 +190,10 @@
 
     [setC (var val) (type-case Result (interp val env sto)
                      [v*s (v-val s-val)
-                          (let ([onde (lookup var env)]) ; acha a variável
+                          (let ([onde (lookup var env)]) 
+                                                       ; acha a variável
                             (v*s v-val
-                                 (override-store ; atualiza
+                                 (override-store       ; atualiza
                                   (cell onde v-val) s-val)))])]
     ))
 
@@ -190,7 +201,7 @@
 (define (parse [s : s-expression]) : langS
   (cond
     [(s-exp-number? s) (numS (s-exp->number s))]
-    [(s-exp-symbol? s) (varS (s-exp->symbol s))] ; pode ser um símbolo livre nas definições de função
+    [(s-exp-symbol? s) (varS (s-exp->symbol s))]       ; pode ser um símbolo livre nas definições de função
     [(s-exp-list? s)
      (let ([sl (s-exp->list s)])
        (case (s-exp->symbol (first sl))
@@ -211,5 +222,4 @@
 
 ; Facilitador
 (define (interpS [s : s-expression]) (interp (desugar (parse s)) mt-env mt-store))
-
-(interpS (read))
+; Leitura de input
