@@ -223,3 +223,4 @@
 ; Facilitador
 (define (interpS [s : s-expression]) (interp (desugar (parse s)) mt-env mt-store))
 ; Leitura de input
+(interpS (read))
