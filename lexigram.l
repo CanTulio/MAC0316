@@ -31,14 +31,14 @@ if { return IF; }
 [*]		{ return MUL;   }
 [/]		{ return DIV;   }
 [%]     { return MOD;   }
-=       { return ATR;   } /*Atribuição*/
-let     { return LET;   }
+=       { return ATR;   } /*Token de Atribuição*/
+let     { return LET;   } /*Token de ḿodificação de variável*/
 
 =>      { return ARROW; }
 [a-zA-Z]+    { 
     yylval.arg = malloc(strlen(yytext)+1);
     strcpy(yylval.arg, yytext);
-    return ID; }  /* Regex para detectar chamadas de função */
+    return ID; }  /* Detecta caracteres alfanumericos (Exceto let, que é detectado pela regra anterior) */
 
 .	{  fprintf(stderr, "Entrada ignorada\n-->%s\n", yytext); }
 

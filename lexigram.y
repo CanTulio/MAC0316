@@ -15,7 +15,6 @@ char *lamPrint(char *arg, char *body) {
 	/* Função que recebe uma função name com parametros "param" e retorna uma 
 	string na forma (call name param) */
 
-	// printf("\n body : %s\n", body);
 	char *res = malloc(strlen("lamC") + strlen(arg) + strlen(body) + 6);
 	sprintf(res, "(%s %s %s)", "func", arg, body);
 	return res;
